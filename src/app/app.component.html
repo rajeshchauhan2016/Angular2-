@@ -1,0 +1,10 @@
+<ng-container *ngIf="data$ | async as data">
+  <div style="text-align: center">
+    <div>{{ data.counter }}</div>
+    <div>
+      <input type="button" value="Start" (click)="start$.emit()">
+      &nbsp;
+      <input type="button" value="Stop" (click)="stop$.emit()">
+    </div>
+  </div>
+</ng-container>

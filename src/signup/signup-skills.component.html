@@ -1,0 +1,94 @@
+<app-find-tasker-header *ngIf="headerEnable"></app-find-tasker-header>
+<section class="skills-experience" [formGroup]="addSkillsForm">
+  <div class="main mt-5 mb-5 m-t0">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 mobile-padding mb-5 skills-m-lg">
+          <div class="card">
+            <div class="card-header">
+              Skills and Experience
+            </div>
+            <div class="card-body">
+              <div class="form-group w-100" *ngIf="descriptionEnable">
+                <label>What I can do for you</label>
+                <div class="profile-title">
+                  <textarea
+                    cols="5"
+                    rows="6"
+                    class="taskina-new-input h-100"
+                    name="short_para"
+                    formControlName="description"
+                    placeholder="Write short description about you and your skills"
+                  ></textarea>
+                  <mat-error
+                    *ngIf="addSkillsForm.controls.description.touched && addSkillsForm.controls.description.invalid"
+                  >
+                    Description is required
+                  </mat-error>
+                </div>
+              </div>
+              <div class="border-c mt-5 mb-4">
+                <div class="form-group">
+                  <h5 class="card-title">Skills</h5>
+                  <div class="des-p">
+                    <img src="assets/images/idea.png" />
+                    <p class="profile-note">
+                      Select your skills and set your hourly rates. You can add or remove skills from your profile
+                      settings, or revise your rates at anytime.
+                    </p>
+                  </div>
+                </div>
+                <div class="form-group skill-f-g">
+                  <div class="icon-btn-input d-flex mb-3">
+                    <div class="input-box input-icon mr-3 w-100">
+                      <input
+                        formControlName="skillTitle"
+                        typeaheadOptionField="name"
+                        [typeahead]="skillsList$"
+                        [(ngModel)]="selectedSkill"
+                        class="form-control padding-custom"
+                        (ngModelChange)="skillChanged($event)"
+                        placeholder="Search skills"
+                        [typeaheadAsync]="true" 
+                        (typeaheadOnSelect)="skillSelect($event)"
+                      />
+                      <i class="icon-search"><img src="assets/images/search.png"/></i>
+                      <mat-error *ngIf="addSkillsForm.controls.skillTitle.touched && errorInSkill">
+                        Select at least one skill
+                      </mat-error>
+                    </div>
+                    <div class="input-submit">
+                      <button type="button" class="taskina-button default-btn material-button">Search</button>
+                    </div>
+                  </div>
+                </div>
+                <taskina-app-skills [search]="skillsSearch" [skills]="skills" [isEditable]="true"></taskina-app-skills>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4 mobile-none" *ngIf="taskinaJoiningEnable">
+          <app-taskina-joining></app-taskina-joining>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-main" *ngIf="descriptionEnable">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-8 col-sm-8 skill-md-100">
+          <div class="footer-left mobile-skill-f">
+            <button type="button" class="button-white taskina-button default-btn material-button">Back</button>
+            <button
+              [ngClass]="addSkillsForm?.controls?.description?.valid ? '' : 'button-disabled'"
+              class="taskina-button default-btn float-right"
+              (click)="onFinalSubmit()"
+            >
+              Submit
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

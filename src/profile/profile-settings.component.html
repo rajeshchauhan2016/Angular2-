@@ -1,0 +1,426 @@
+<ij-site-subheader></ij-site-subheader>
+<header id="page-header">
+    <div class="mini">
+        <div class="container">
+            <h1 class="text-center main-heading">PROFILE SETTINGS</h1>
+        </div>
+    </div>
+</header>
+<header id="page-header">
+    <nav class="tabs">
+        <ul>
+            <li><a (click)="onTab('portfolio')" [ngClass]="{'active': activeTab == 'portfolio'}">Portfolio</a></li>
+            <li><a (click)="onTab('personal')" [ngClass]="{'active': activeTab == 'personal'}">Personal Settings</a></li>
+            <li><a (click)="onTab('password')" [ngClass]="{'active': activeTab == 'password'}">Change Password</a></li>
+        </ul>
+    </nav>
+</header>
+<div class="container" [ngSwitch]="activeTab">
+    <ng-container *ngSwitchCase="'portfolio'">
+        <form #f1="ngForm" (ngSubmit)="portfolioSave(f1.form)" (keydown.enter)="$event.preventDefault()" novalidate>
+            <fieldset>
+                <legend>Personal Details<small>(Info will be shared with employers)</small></legend>
+                <div class="row">
+                    <div class="col-lg-4">
+                        <label for="biography">Biography</label>
+                        <textarea id="biography" name="biography" class="form-control" rows="6" required maxlength="512" [ij-input-validation]="'Please enter a biography.'"
+                            [(ngModel)]="model.biography" #biography></textarea>
+                        <ij-character-counter [element]="biography"></ij-character-counter>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <label for="diet">Dietary Restrictions</label>
+                        <textarea id="diet" name="diet" class="form-control" rows="6" maxlength="512" [(ngModel)]="model.dietaryRestrictions" #diet></textarea>
+                        <ij-character-counter [element]="diet"></ij-character-counter>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <label for="allergies">Allergies</label>
+                        <textarea id="allergies" name="allergies" class="form-control" rows="6" maxlength="512" [(ngModel)]="model.allergies" #allergies></textarea>
+                        <ij-character-counter [element]="allergies"></ij-character-counter>
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>Advanced Info
+                    <small>(Info will be displayed on your profile)</small>
+                </legend>
+                <div class="row">
+                    <div class="col-lg-4">
+                        <fieldset class="alerts">
+                            <label for="imdbId">IMDb Link</label>
+                            <div class="input-group">
+                                <span class="input-group-addon" id="addon-imdb">https://www.imdb.com/name/nm</span>
+                                <input id="imdbId" name="imdbId" type="text" class="form-control" maxlength="7" [ij-input-validation]="'Please provide your IMDb profile page.'"
+                                    [pattern]="imdbIdRegex" [(ngModel)]="model.imdbId" aria-describedby="addon-imdb">
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <fieldset class="alerts">
+                            <label for="personalWebSite">Personal Link</label>
+                            <div class="input-group">
+                                <span class="input-group-addon" id="addon-imdb">http://</span>
+                                <input 
+                                    id="personalWebSite" 
+                                    name="personalWebSite" 
+                                    class="form-control" 
+                                    maxlength="256" 
+                                    type="url" 
+                                    pattern="(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&=]*\/?)" 
+                                    placeholder="https://www.domain.com/"
+                                    [(ngModel)]="model.personalWebSite" [ij-input-validation]="'Enter a valid URL.'" />
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <fieldset>
+                            <label for="reel">Reel
+                                <small>(YouTube or Vimeo video)</small>
+                            </label>
+                            <input id="reel" name="reel" class="form-control" maxlength="256" type="url" placeholder="https://www.youtube.com/watch?v=#"
+                                [(ngModel)]="model.reel" [ij-input-validation]="'Enter a valid Vimeo/YouTube URL.'" [ij-video-url]="model.reel"
+                            />
+                        </fieldset>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4">
+                        <fieldset class="upload">
+                            <legend>Profile Picture</legend>
+                            <button type="button" pButton label="Choose Image" icon="fa-plus" iconPos="left" (click)="onProfilePicClicked($event)"></button>
+                            <ij-profilepic-dialog></ij-profilepic-dialog>
+                        </fieldset>
+                    </div>
+                    <div class="col-lg-4">
+                        <fieldset class="upload">
+                            <legend>Gear List</legend>
+                            <p-fileUpload name="uploadfile" #fuGear chooseLabel="Choose PDF" mode="basic" [maxFileSize]="maxGearFileSize" (onBeforeSend)="onBeforeSend($event)"
+                                (onUpload)="onPdfUploaded($event)" [url]="gearUrl" accept="application/pdf">
+                            </p-fileUpload>
+                            <p class="small help-block">
+                                <span *ngIf="model.gearList">&#10004; PDF attached.</span>
+                            </p>
+                        </fieldset>
+                    </div>
+                    <div class="col-lg-4">
+                        <fieldset class="upload">
+                            <legend>Resume</legend>
+                            <p-fileUpload name="uploadfile" #fuResume chooseLabel="Choose PDF" mode="basic" [maxFileSize]="maxResumeFileSize" (onBeforeSend)="onBeforeSend($event)"
+                                (onUpload)="onPdfUploaded($event)" [url]="resumeUrl" accept="application/pdf">
+                            </p-fileUpload>
+                            <p class="small help-block">
+                                <span *ngIf="model.resume">&#10004; PDF attached.</span>
+                            </p>
+                        </fieldset>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4">
+                        <fieldset>
+                            <legend>Positions Available for Hire</legend>
+                            <p-autoComplete id="crewRoles" name="crewRoles" placeholder="Director, Producer..." autoHighlight="true" required="true"
+                                forceSelection="true" dropdown="true" styleClass="wrap" [ij-input-validation]="'Please select up to 3 positions.'"
+                                [(ngModel)]="model.crewRoles" [suggestions]="crewRoleSuggestions" (completeMethod)="onCrewRolesKeyDown($event)"
+                                [multiple]="true">
+                            </p-autoComplete>
+                            <p class="small help-block">
+                                Only the top 3 roles you want to be hired for.
+                                <br> These positions appear in search results.
+                            </p>
+                        </fieldset>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <fieldset>
+                            <legend>Working Cities</legend>
+                            <p-autoComplete id="profileCities" name="profileCities" placeholder="City, State" autoHighlight="true" required="true" forceSelection="true"
+                                dropdown="true" styleClass="wrap" [ij-input-validation]="'Please select up to 3 cities that you are able to work in.'"
+                                [(ngModel)]="model.profileCities" [suggestions]="allCitiesSuggestions" (completeMethod)="onCitiesKeyDown($event)"
+                                [multiple]="true">
+                            </p-autoComplete>
+                            <p class="small help-block">
+                                Select up to 3 cities that you are able to work in.
+                                <br> You will appear in search results for these cities.
+                            </p>
+                        </fieldset>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <fieldset>
+                            <legend>Acceptable Payment Rates</legend>
+                            <div class="alerts" *ngFor="let budget of budgetLevelList" [ngSwitch]="budget.name">
+                                <p-checkbox *ngSwitchCase="budgets.UltraLowBudget" [disabled]="budget.disabled" name="acceptsUltraLowBudget" styleClass="ij-checkbox" binary="true" [label]="budget.label" [(ngModel)]="model.acceptsUltraLowBudget">
+                                </p-checkbox>
+
+                                <p-checkbox *ngSwitchCase="budgets.LowBudget" [disabled]="budget.disabled" name="lowBudget" styleClass="ij-checkbox" binary="true" [label]="budget.label" [(ngModel)]="model.acceptsLowBudget">
+                                </p-checkbox>
+
+                                <p-checkbox *ngSwitchCase="budgets.IndustryScale" [disabled]="budget.disabled" name="acceptsIndustryScale" styleClass="ij-checkbox" binary="true" [label]="budget.label" [(ngModel)]="model.acceptsIndustryScale">
+                                </p-checkbox>
+
+                                <p-checkbox *ngSwitchCase="budgets.UnionRates" [disabled]="budget.disabled" name="acceptsUnionRates" styleClass="ij-checkbox" binary="true" [label]="budget.label" [(ngModel)]="model.acceptsUnionRates">
+                                </p-checkbox>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4">
+                        <fieldset>
+                            <legend>Listed Payment Rate</legend>
+                             <div class="group selectOtn"> 
+                                <select class="form-control" required name="paymentRate" #paymentRate="ngModel" [(ngModel)]="model.defaultBudget">
+                                    <option class="option"
+                                        *ngFor="let g of budgetLevelList"
+                                        [disabled]="g.disabled" 
+                                        [ngValue]="g.label">{{g.label}}</option>
+                                </select>
+                            </div>
+                        
+                                <p class="small help-block">Shown on your profile page.</p>
+
+                        </fieldset>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <fieldset>
+                            <legend>Union Affiliation</legend>
+                            <p-autoComplete id="unionAffiliation" name="unionAffiliation" placeholder="Union" readonly="true" required="true" dropdown="true"
+                                [(ngModel)]="model.unionTypeName" [suggestions]="allUnionTypeSuggestions" (completeMethod)="onUnionTypeKeyDown($event)"
+                                [ij-input-validation]="'Please select a union affiliation.'" [multiple]="false">
+                            </p-autoComplete>
+                            <p class="small help-block">Shown on your profile page.</p>
+                        </fieldset>
+                    </div>
+
+               
+                    <div class="col-lg-4">
+                        <fieldset>
+                          <legend>
+                            Organization    
+                            <span class="removeBorder">(Type in the group passcode)</span>
+                                                  
+                          </legend>
+                          <div class="relative">
+                            <input id="organization" name="organization" class="form-control" maxlength="256" type="url"
+                                   [(ngModel)]="model.passCode" [ij-input-validation]="'Enter a Organization'" (keyup.enter)="getOrganization()" />
+                            <input type="button" (click)="getOrganization()" id="btnOrganization">
+                          </div>
+                         
+                          <p class="alert alert-danger" *ngIf="oragnisationValidation">{{oragnisationValidation}} </p>
+                          <p *ngFor="let x of organizations"  (click)="delete(x.organizationPassCode)"  class="small help-block help-block-cust h25">
+                            <a class="orgBtn" *ngIf="!enableDelete" (click)="delete()"></a><a class="blueBtn" *ngIf="enableDelete"></a>{{x.organizationName}}
+                          </p>
+  
+                        </fieldset>
+                      </div>
+
+
+
+
+                </div>
+                <div class="row">
+                    <div class="col-lg-4">
+                        <fieldset class="alerts">
+                            <legend>Show/Hide Actions</legend>
+
+                            <p-checkbox name="show_refer" styleClass="ij-checkbox" binary="true" label="Refer" [(ngModel)]="model.showRefer">
+                            </p-checkbox>
+
+                            <p-checkbox name="show_contact_me" styleClass="ij-checkbox" binary="true" label="Contact Me" [(ngModel)]="model.showContactMe">
+                            </p-checkbox>
+
+                            <p-checkbox name="show_hire_me" styleClass="ij-checkbox" binary="true" label="Hire Me" [(ngModel)]="model.showHireMe">
+                            </p-checkbox>
+
+                            <p-checkbox name="show_resume" styleClass="ij-checkbox" binary="true" label="Resume" [(ngModel)]="model.showResume">
+                            </p-checkbox>
+
+                            <p-checkbox name="show_gear" styleClass="ij-checkbox" binary="true" label="Gear" [(ngModel)]="model.showGear">
+                            </p-checkbox>
+                        </fieldset>
+                    </div>
+                    <div class="col-lg-4">
+                        <fieldset class="toggle-slider">
+                            <legend>Deactive Account</legend>
+                            <input name="isProfileActive" class="toggle" type="checkbox" [(ngModel)]="isProfileActive" />
+                            <p class="small help-block">
+                                By deactivating your account, it will become invisible to the public until you turn it back on.
+                            </p>
+                        </fieldset>
+                    </div>
+
+
+                         <div class="col-lg-4">
+                        <fieldset class="alerts">
+                            <legend>Email Notifications</legend>
+                            <p-checkbox name="enable_weekly_newsletters" styleClass="ij-checkbox" binary="true" label="Weekly newsletter emails for activity in your area."
+                                [(ngModel)]="model.enableWeeklyNewsletters">
+                            </p-checkbox>
+
+                            <p-checkbox name="enable_reviews" styleClass="ij-checkbox" binary="true" label="Notify when someone reviews you." [(ngModel)]="model.notifyOnReviews">
+                            </p-checkbox>
+
+                            <p-checkbox name="enable_old_message" styleClass="ij-checkbox" binary="true" label="Notify when a message is not viewed in 30 minutes."
+                                [(ngModel)]="model.notifyOnOldMessages">
+                            </p-checkbox>
+                        </fieldset>
+                    </div>
+                </div>
+            </fieldset>
+            <footer>
+                <div class="saveReset">
+                    <input type="submit" value="Save" />
+                </div>
+
+                <div class="alert alert-danger" *ngIf="showFormInvalid(f1)">
+                    Some of your changes are invalid. Please review your changes and try again.
+                </div>
+
+                <div class="alert alert-danger" *ngIf="showSaveErrored">
+                    <div *ngIf="errors.length > 0 then errorList else errorGeneric"></div>
+
+                    <ng-template #errorList>
+                        <ul>
+                            <li *ngFor="let error of errors">{{error}}</li>
+                        </ul>
+                    </ng-template>
+
+                    <ng-template #errorGeneric>
+                        <li *ngFor="let error of errors">{{error}}</li>
+                    </ng-template>
+                </div>
+            </footer>
+        </form>
+    </ng-container>
+
+    <ng-container *ngSwitchCase="'personal'">
+        <form #f2="ngForm" (ngSubmit)="personalSave(f2.form)" (keydown.enter)="$event.preventDefault()" novalidate>
+            <fieldset>
+                <legend>Basic Info
+                    <small>(Info will be shared with employers)</small>
+                </legend>
+                <div class="row">
+                    <div class="col-lg-4">
+                        <label for="fname">First Name</label>
+                        <input id="fname" name="fname" type="text" class="form-control" required maxlength="32" [pattern]="nameRegex" [ngModel]="model.firstName | titlecase"
+                            (ngModelChange)="model.firstName=$event" [ij-input-validation]="'Please enter a first name.'" />
+                    </div>
+
+                    <div class="col-lg-4">
+                        <label for="lname">Last Name</label>
+                        <input id="lname" name="lname" type="text" class="form-control" required maxlength="32" [pattern]="nameRegex" [ngModel]="model.lastName | titlecase"
+                            (ngModelChange)="model.lastName=$event" [ij-input-validation]="'Please enter a last name.'" />
+                    </div>
+
+                    <div class="col-lg-4">
+                        <label for="gender">Gender</label>
+                        <p-autoComplete id="gender" name="gender" placeholder="Gender" required="true" readonly="true" forceSelection="true" dropdown="true"
+                            [(ngModel)]="model.gender" [suggestions]="allGenderTypeSuggestions" (completeMethod)="onGenderTypeKeyDown($event)"
+                            [multiple]="false">
+                        </p-autoComplete>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <label for="address1">Street Address</label>
+                                <input id="address1" name="address1" type="text" class="form-control" maxlength="256" [ij-input-validation]="'The address is too long.'"
+                                    [(ngModel)]="model.addressLine1" />
+                            </div>
+                            <div class="col-lg-4">
+                                <label for="address2">Apt/Suite</label>
+                                <input id="address2" name="address2" type="text" class="form-control" maxlength="10" [ij-input-validation]="'The address is too long.'"
+                                    [(ngModel)]="model.addressLine2" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <label for="city">City</label>
+                        <input id="city" name="city" type="text" class="form-control" required minlength="2" maxlength="128" [ngModel]="model.city | titlecase"
+                            (ngModelChange)="model.city=$event" [ij-input-validation]="'Please enter a city.'" />
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="row">
+                            <div class="col-lg-9">
+                                <label for="states">State</label>
+                                <p-autoComplete id="states" name="states" placeholder="State" readonly="true" required="true" forceSelection="true" dropdown="true"
+                                    [(ngModel)]="model.state" [ij-input-validation]="'Please select a state.'" [suggestions]="allStateTypeSuggestions"
+                                    (completeMethod)="onStateTypeKeyDown($event)" [multiple]="false">
+                                </p-autoComplete>
+                            </div>
+                            <div class="col-lg-3">
+                                <label for="zipCode">Zip Code</label>
+                                <input id="zipCode" name="zipCode" type="text" class="form-control" required [ij-input-validation]="'Please enter a zip code.'"
+                                    [(ngModel)]="model.zipCode" [pattern]="zipCodeRegex" [textMask]="{mask: zipCodeMask}" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Contact
+                    <small>(Info will be shared with employers)</small>
+                </legend>
+                <div class="row">
+                    <div class="col-lg-4">
+                        <label for="profile_address">Profile Address</label>
+                        <input id="profile_address" name="profile_address" type="text" class="form-control" autocomplete="off" tabindex="-1" readonly
+                            value="{{profileUrl}}" />
+                    </div>
+
+                    <div class="col-lg-4">
+                        <label for="email">Email</label>
+                        <input id="email" name="email" type="email" class="form-control" autocomplete="off" tabindex="-1" readonly [(ngModel)]="model.email"
+                        />
+                    </div>
+
+                    <div class="col-lg-4">
+                        <label for="phone">Phone</label>
+                        <input id="phone" name="phone" type="tel" placeholder="(999) 999-9999" class="form-control" [ij-input-validation]="'Please enter a valid phone number.'"
+                            [pattern]="phoneRegex" [(ngModel)]="model.phoneNumber" [textMask]="{mask: phoneMask}" />
+                    </div>
+                </div>
+            </fieldset>
+
+            <footer>
+                <div class="saveReset">
+                    <input class="hide" (click)="onReset(f2); $event.preventDefault()" type="reset" value="Reset" />
+                    <input type="submit" value="Save" />
+                </div>
+
+                <div class="alert alert-danger" *ngIf="showFormInvalid(f2)">
+                    Some of your changes are invalid. Please review your changes and try again.
+                </div>
+
+                <div class="alert alert-danger" *ngIf="showSaveErrored">
+                    <div *ngIf="errors.length > 0; then errorList else errorGeneric"></div>
+
+                    <ng-template #errorList>
+                        <ul>
+                            <li *ngFor="let error of errors">{{error}}</li>
+                        </ul>
+                    </ng-template>
+
+                    <ng-template #errorGeneric>
+                        Your changes did not save. Please review your changes and try again.
+                    </ng-template>
+                </div>
+            </footer>
+        </form>
+    </ng-container>
+
+    <ng-container *ngSwitchCase="'password'">
+        <ij-change-password></ij-change-password>
+    </ng-container>
+</div>
+<ij-site-footer></ij-site-footer>
+<p-confirmDialog [acceptLabel]="confirmAcceptLabel" appendTo="body"></p-confirmDialog>
